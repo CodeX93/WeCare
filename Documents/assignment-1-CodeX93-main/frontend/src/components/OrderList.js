@@ -11,7 +11,7 @@ export default function OrderList() {
   useEffect(() => {
     const fetchData = async () => {
       const result = await axios.get(
-        "54.249.143.57:3001/inventory/getorderdata"
+        "http://54.249.143.57:3001/inventory/getorderdata"
       );
       setOrders(result.data);
     };

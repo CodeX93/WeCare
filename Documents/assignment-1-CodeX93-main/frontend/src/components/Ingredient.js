@@ -22,13 +22,15 @@ export default function Ingredient() {
   useEffect(() => {
     const fetchCategories = async () => {
       const result = await axios.get(
-        "54.249.143.57:3001/inventory/getCategory"
+        "http://54.249.143.57:3001/inventory/getCategory"
       );
       setCategories(result.data);
       setCatergory(result.data[0].CategoryName);
     };
     const fetchTypes = async () => {
-      const result = await axios.get("54.249.143.57:3001/inventory/getType");
+      const result = await axios.get(
+        "http://54.249.143.57:3001/inventory/getType"
+      );
       console.log(result.data);
       setTypes(result.data);
       setType(result.data[0].TypeName);

@@ -10,7 +10,7 @@ export default function InventoryReport() {
   useEffect(() => {
     const fetchData = async () => {
       const result = await axios.get(
-        "54.249.143.57:3001/inventory/getInventory"
+        "http://54.249.143.57:3001/inventory/getInventory"
       );
       setInventory(result.data);
     };
