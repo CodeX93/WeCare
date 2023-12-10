@@ -3,15 +3,16 @@ import {
   doc,
   getDoc,
   collection,
-  Firestore,
   deleteDoc,
   Timestamp,
 } from "firebase/firestore";
+
 import { Forum, db } from "../config.js";
 import ForumModel from "../Model/Forum.js";
 import admin from "../admin-firebaseConfig.js";
 const firestore = admin.firestore();
 import { getFirestore } from "firebase/firestore";
+
 const createPost = async (req, res, next) => {
   try {
     const data = req.body;
@@ -65,10 +66,7 @@ const getPostbyID = async (req, res, next) => {
 
     if (documentSnapshot.exists()) {
       const documentData = documentSnapshot.data();
-
-      // Using the spread operator to copy all properties from documentData to post
       const post = new ForumModel({ ...documentData });
-
       res.send(post);
     } else {
       res.status(404).send("Post not found");
