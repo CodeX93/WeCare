@@ -6,6 +6,9 @@ import {
   deleteDoc,
   updateDoc,
   Timestamp,
+  getDocs,
+  query,
+  where,
 } from "firebase/firestore";
 
 import { Appointment, db } from "../config.js";
@@ -17,6 +20,7 @@ import { getFirestore } from "firebase/firestore";
 const makeAppointment = async (req, res) => {
   try {
     const data = req.body;
+
     data.Timestamp = Timestamp.now();
 
     const appointment = await addDoc(Appointment, data);
@@ -64,21 +68,49 @@ const fetchAllAppointment = async (req, res) => {
   }
 };
 
-const getAppointmentById = async (req, res) => {
-  const appId = req.params.id;
+const getAppointmentsByDoctor = async (req, res) => {
+  const doctorUniqueIdentifier = req.params.id;
 
   try {
-    const documentSnapshot = await getDoc(
-      doc(collection(db, "Appointment"), appId)
+    const querySnapshot = await getDocs(
+      query(
+        collection(db, "Appointment"),
+        where("doctorUniqueID", "==", doctorUniqueIdentifier)
+      )
     );
 
-    if (documentSnapshot.exists()) {
-      const documentData = documentSnapshot.data();
+    const appointments = [];
+
+    querySnapshot.forEach((doc) => {
+      const documentData = doc.data();
       const appointment = new AppointmnentModel({ ...documentData });
-      res.send(appointment);
-    } else {
-      res.status(404).send("Appointment not found");
-    }
+      appointments.push(appointment);
+    });
+
+    res.send(appointments);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Internal Server Error");
+  }
+};
+
+const getAppointmentsByPatient = async (req, res) => {
+  const patientUuid = req.params.id;
+
+  try {
+    const querySnapshot = await getDocs(
+      query(collection(db, "Appointment"), where("userUid", "==", patientUuid))
+    );
+
+    const appointments = [];
+
+    querySnapshot.forEach((doc) => {
+      const documentData = doc.data();
+      const appointment = new AppointmnentModel({ ...documentData });
+      appointments.push(appointment);
+    });
+
+    res.send(appointments);
   } catch (error) {
     console.error(error);
     res.status(500).send("Internal Server Error");
@@ -127,7 +159,8 @@ const deleteAppointment = async (req, res) => {
 export {
   makeAppointment,
   fetchAllAppointment,
-  getAppointmentById,
+  getAppointmentsByDoctor,
   updateAppointment,
+  getAppointmentsByPatient,
   deleteAppointment,
 };

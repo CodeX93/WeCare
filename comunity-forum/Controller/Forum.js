@@ -6,22 +6,28 @@ import {
   deleteDoc,
   Timestamp,
 } from "firebase/firestore";
+import { format } from "date-fns";
 
 import { Forum, db } from "../config.js";
 import ForumModel from "../Model/Forum.js";
 import admin from "../admin-firebaseConfig.js";
 const firestore = admin.firestore();
+import { v4 as uuidv4 } from "uuid";
+
 import { getFirestore } from "firebase/firestore";
 
 const createPost = async (req, res, next) => {
   try {
     const data = req.body;
+    data.id = uuidv4();
     data.Timestamp = Timestamp.now();
+    console.log(req.body.authorName);
 
+    // data.Date = Date.now();
     const post = await addDoc(Forum, data);
 
     if (post.id) {
-      res.send("Post Added Successfully");
+      res.send(data); // Send back the created post data
     } else {
       res.status(500).send("Error adding post");
     }
@@ -45,8 +51,10 @@ const fetchAllPost = async (req, res, next) => {
           element.data().id,
           element.data().PostTitle,
           element.data().PostContent,
+
           element.data().AuthorId,
-          element.data().Timestamp
+          element.data().Timestamp,
+          element.data().authorName
         );
         allData.push(forum);
       });

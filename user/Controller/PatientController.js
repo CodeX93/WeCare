@@ -89,17 +89,58 @@ const getAllPatients = async (req, res) => {
   }
 };
 
+const getPatientByUID = async (req, res) => {
+  if (!req.body.uid) {
+    return res.status(400).json({ message: "No UID provided" });
+  }
+
+  const userUID = req.body.uid.trim(); // Trim any accidental whitespace from the UID
+  const userRef = firestore.collection("users");
+
+  try {
+    const querySnapshot = await userRef
+      .where("uid", "==", userUID)
+      .limit(1)
+      .get();
+
+    if (querySnapshot.empty) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Since UIDs are unique, there should only be one document.
+    const userDoc = querySnapshot.docs[0];
+    const user = { id: userDoc.id, ...userDoc.data() };
+    return res.status(200).json(user);
+  } catch (error) {
+    console.error("Error fetching patient:", error);
+    return res
+      .status(500)
+      .json({ message: "Internal server error", error: error.message });
+  }
+};
+
 const updatePatientById = async (req, res) => {
-  const patientId = req.body.uid;
+  const patientId = req.params.id; // Get patientId from URL params
   const updatedData = req.body;
 
   try {
-    const patientDocRef = firestore.doc(`users/${patientId}`);
-    await patientDocRef.update(updatedData);
+    const patientsCollectionRef = firestore.collection("users");
+    const patientDocRef = patientsCollectionRef.where("uid", "==", patientId);
 
-    res
-      .status(200)
-      .json({ message: `Patient with ID ${patientId} updated successfully.` });
+    const snapshot = await patientDocRef.get();
+    if (snapshot.empty) {
+      return res
+        .status(404)
+        .json({ message: `Patient with ID ${patientId} not found.` });
+    }
+
+    snapshot.forEach(async (doc) => {
+      await doc.ref.update(updatedData);
+    });
+
+    res.status(200).json({
+      message: `Patient(s) with ID ${patientId} updated successfully.`,
+    });
   } catch (error) {
     console.error("Error updating patient:", error);
     res.status(500).send(error.message);
@@ -122,4 +163,10 @@ const deletePatientById = async (req, res) => {
   }
 };
 
-export { addpatient, getAllPatients, updatePatientById, deletePatientById };
+export {
+  addpatient,
+  getAllPatients,
+  updatePatientById,
+  deletePatientById,
+  getPatientByUID,
+};

@@ -3,16 +3,18 @@ import express from "express";
 import {
   makeAppointment,
   fetchAllAppointment,
-  getAppointmentById,
+  getAppointmentsByDoctor,
   updateAppointment,
   deleteAppointment,
+  getAppointmentsByPatient,
 } from "../Controller/AppointmentController.js";
 
 const appointmentRoute = express.Router();
 
 appointmentRoute.post("/makeappointment", makeAppointment);
 appointmentRoute.get("/allappointment", fetchAllAppointment);
-appointmentRoute.get("/:id", getAppointmentById);
+appointmentRoute.get("/:id", getAppointmentsByDoctor);
+appointmentRoute.get("/patient/:id", getAppointmentsByPatient);
 appointmentRoute.put("/update/:id", updateAppointment);
 appointmentRoute.delete("/delete/:id", deleteAppointment);
 
